@@ -5,9 +5,11 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    height: 100%;
   }
   body {
     @apply bg-girnar-50 text-girnar-900 antialiased;
+    min-height: 100%;
   }
 }
 
@@ -32,5 +34,51 @@
   .auth-gradient {
     @apply min-h-screen bg-gradient-to-br from-girnar-100 via-sacred-dawn to-girnar-200
            bg-[length:300%_300%] animate-gradient-shift;
+  }
+
+  /* App shell: fixed header + scrollable main + fixed footer */
+  .app-shell {
+    @apply fixed inset-0 flex flex-col bg-girnar-50 overflow-hidden;
+  }
+
+  .app-header {
+    @apply fixed top-0 left-0 right-0 z-40 glass-card rounded-none border-b border-girnar-200/60 shadow-sm;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .app-header-inner {
+    @apply max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-2;
+  }
+
+  .app-main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    margin-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+  }
+
+  .app-footer {
+    @apply fixed left-0 right-0 z-40;
+    bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .dashboard-page {
+    @apply flex flex-col h-full min-h-0;
+  }
+
+  .dashboard-scroll {
+    @apply flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-4;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dashboard-toolbar {
+    @apply shrink-0 px-4 pt-2 pb-2 max-w-7xl mx-auto w-full;
+  }
+
+  .btn-icon {
+    @apply w-10 h-10 flex items-center justify-center rounded-xl border border-girnar-300
+           bg-white/90 text-girnar-800 hover:bg-girnar-100 transition shadow-sm;
   }
 }

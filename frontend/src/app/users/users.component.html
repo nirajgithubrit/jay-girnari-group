@@ -1,17 +1,18 @@
-<div class="px-4 max-w-7xl mx-auto py-4 pb-8">
-  <div class="flex items-center gap-3 mb-6">
-    <a routerLink="/dashboard" class="btn-secondary text-sm py-1.5">← Back</a>
-    <p class="text-lg font-semibold text-girnar-900">Manage Users</p>
-  </div>
-
-  <div class="flex flex-wrap gap-2 mb-6">
-    <button type="button" class="btn-primary text-sm" (click)="openAddUser()">+ Add User</button>
-    <button type="button" class="btn-secondary text-sm" (click)="openAddData()">+ Add User Data</button>
+<div class="h-full flex flex-col min-h-0 overflow-y-auto dashboard-scroll max-w-7xl mx-auto w-full">
+  <div class="flex flex-col gap-3 mb-3 pt-2 md:mb-4 md:flex-row md:items-center md:justify-between md:gap-4">
+    <div class="flex items-center gap-3 min-w-0">
+      <a routerLink="/dashboard" class="btn-secondary text-sm py-1.5 shrink-0">← Back</a>
+      <p class="text-lg font-semibold text-girnar-900">Manage Users</p>
+    </div>
+    <div class="flex flex-wrap gap-2 shrink-0">
+      <button type="button" class="btn-primary text-sm" (click)="openAddUser()">+ Add User</button>
+      <button type="button" class="btn-secondary text-sm" (click)="openAddData()">+ Add User Data</button>
+    </div>
   </div>
 
   <input
     type="search"
-    class="input-field max-w-md mb-4"
+    class="input-field w-full max-w-md md:max-w-none mb-4 block"
     placeholder="Search users..."
     [ngModel]="search()"
     (ngModelChange)="onSearch($event)"
@@ -22,7 +23,7 @@
   } @else if (customers().length === 0) {
     <app-empty-state icon="👥" title="No users yet" description="Add your first user to get started." />
   } @else {
-    <div class="hidden md:block glass-card overflow-hidden">
+    <div class="hidden md:block glass-card overflow-hidden mb-6">
       <table class="w-full text-sm">
         <thead class="bg-girnar-100/80 text-girnar-700">
           <tr>
@@ -46,7 +47,7 @@
       </table>
     </div>
 
-    <div class="md:hidden space-y-3">
+    <div class="md:hidden space-y-3 pb-4">
       @for (c of customers(); track c._id) {
         <div class="glass-card p-4">
           <p class="font-semibold">{{ c.name }}</p>

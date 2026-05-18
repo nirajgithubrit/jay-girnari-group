@@ -1,8 +1,6 @@
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { sendMonthlyFundReminders } from '../services/notificationService.js';
-
 export const getVapidPublicKey = asyncHandler(async (req, res) => {
   const key = process.env.VAPID_PUBLIC_KEY;
   if (!key) {
@@ -43,14 +41,4 @@ export const unsubscribePush = asyncHandler(async (req, res) => {
     });
   }
   res.json({ success: true, message: 'Unsubscribed' });
-});
-
-/** Admin only — bypasses "5th of month" rule for testing */
-export const testSendReminders = asyncHandler(async (req, res) => {
-  const result = await sendMonthlyFundReminders({ force: true });
-  res.json({
-    success: true,
-    message: 'Test reminders processed',
-    data: result,
-  });
 });

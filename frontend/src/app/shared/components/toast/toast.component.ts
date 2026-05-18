@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -6,7 +7,8 @@ import { ToastService } from '../../../services/toast.service';
   standalone: true,
   template: `
     <div
-      class="fixed top-4 left-4 right-4 z-[100] flex flex-col items-stretch gap-2 pointer-events-none sm:left-auto sm:right-4 sm:items-end sm:max-w-sm sm:w-[calc(100%-2rem)]"
+      class="fixed left-4 right-4 z-[100] flex flex-col-reverse items-stretch gap-2 pointer-events-none sm:left-auto sm:right-4 sm:items-end sm:max-w-sm sm:w-[calc(100%-2rem)]"
+      [class]="positionClass()"
     >
       @for (toast of toastService.toasts(); track toast.id) {
         <div
@@ -22,6 +24,15 @@ import { ToastService } from '../../../services/toast.service';
 })
 export class ToastComponent {
   readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+
+  positionClass = computed(() => {
+    const url = this.router.url;
+    const aboveFooter = url.includes('/dashboard');
+    return aboveFooter
+      ? 'bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))]'
+      : 'bottom-4 pb-[env(safe-area-inset-bottom,0px)]';
+  });
 
   toastClass(type: string): string {
     const map: Record<string, string> = {

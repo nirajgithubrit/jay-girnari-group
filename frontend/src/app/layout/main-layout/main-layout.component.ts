@@ -7,10 +7,12 @@ import { HeaderComponent } from '../header/header.component';
   standalone: true,
   imports: [RouterOutlet, HeaderComponent],
   template: `
-    <app-header />
-    <main class="pt-14 min-h-screen">
-      <router-outlet />
-    </main>
+    <div class="app-shell">
+      <app-header />
+      <main class="app-main">
+        <router-outlet />
+      </main>
+    </div>
   `,
 })
 export class MainLayoutComponent {}

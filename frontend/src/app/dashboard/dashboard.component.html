@@ -1,10 +1,45 @@
-<app-pwa-install-banner />
-<app-notification-prompt />
-<div class="pb-28 px-4 max-w-7xl mx-auto">
-  <div class="py-4 space-y-3">
-    <p class="text-xl font-bold text-girnar-900 tracking-wide">{{ monthLabel() }}</p>
+<div class="dashboard-page">
+  <app-pwa-install-banner />
+  <app-notification-prompt />
 
-    <div class="flex items-center gap-1.5 w-full flex-nowrap">
+  <div class="dashboard-toolbar">
+    <div class="flex items-center justify-between gap-2 mb-3">
+      <p class="text-xl font-bold text-girnar-900 tracking-wide">{{ monthLabel() }}</p>
+      @if (auth.isAdmin()) {
+        <button
+          type="button"
+          class="btn-icon shrink-0"
+          (click)="exportExcel()"
+          [disabled]="loading() || exporting()"
+          aria-label="Export Excel"
+          title="Export Excel"
+        >
+          @if (exporting()) {
+            <span class="text-xs">…</span>
+          } @else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 text-emerald-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="8" y1="13" x2="16" y2="13" />
+              <line x1="8" y1="17" x2="16" y2="17" />
+              <line x1="10" y1="9" x2="14" y2="9" />
+            </svg>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="flex items-center gap-1.5 w-full flex-nowrap mb-3">
       <button
         type="button"
         class="btn-secondary text-xs py-1.5 px-2 shrink-0 disabled:opacity-40"
@@ -31,106 +66,104 @@
         Next →
       </button>
     </div>
-  </div>
 
-  <div class="mb-4">
     <input
       type="search"
-      class="input-field w-full max-w-md"
+      class="input-field w-full max-w-md md:max-w-none"
       placeholder="Search by name or phone..."
       [ngModel]="search()"
       (ngModelChange)="onSearchChange($event)"
     />
   </div>
 
-  @if (loading()) {
-    <app-loader message="Loading..." />
-  } @else if (filteredRows().length === 0) {
-    <app-empty-state
-      icon="👥"
-      title="No users found"
-      description="Add users from the Users page to see them here."
-    />
-  } @else {
-    <!-- Desktop table -->
-    <div class="hidden md:block glass-card overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-girnar-100/80 text-girnar-700">
-          <tr>
-            <th class="text-left p-3">Date</th>
-            <th class="text-left p-3">Name</th>
-            <th class="text-left p-3">Phone</th>
-            <th class="text-right p-3">Credit</th>
-            <th class="text-right p-3">Debit</th>
-            @if (auth.isAdmin()) {
-              <th class="text-center p-3">Actions</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of filteredRows(); track row.customer._id) {
-            <tr class="border-t border-girnar-100 hover:bg-girnar-50/50">
-              <td class="p-3">
-                @if (row.date) {
-                  {{ row.date | date:'dd/MM/yyyy' }}
-                } @else {
-                  <span class="text-girnar-400">—</span>
-                }
-              </td>
-              <td class="p-3 font-medium">{{ row.customer.name }}</td>
-              <td class="p-3">{{ row.customer.phoneNumber }}</td>
-              <td class="p-3 text-right text-emerald-700">
-                {{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}
-              </td>
-              <td class="p-3 text-right text-red-600">
-                {{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}
-              </td>
+  <div class="dashboard-scroll max-w-7xl mx-auto w-full">
+    @if (loading()) {
+      <app-loader message="Loading..." />
+    } @else if (filteredRows().length === 0) {
+      <app-empty-state
+        icon="👥"
+        title="No users found"
+        description="Add users from the Users page to see them here."
+      />
+    } @else {
+      <div class="hidden md:block glass-card overflow-hidden mb-4">
+        <table class="w-full text-sm">
+          <thead class="bg-girnar-100/80 text-girnar-700">
+            <tr>
+              <th class="text-left p-3">Date</th>
+              <th class="text-left p-3">Name</th>
+              <th class="text-left p-3">Phone</th>
+              <th class="text-right p-3">Credit</th>
+              <th class="text-right p-3">Debit</th>
               @if (auth.isAdmin()) {
-                <td class="p-3 text-center space-x-2">
-                  @if (row.transaction) {
-                    <button type="button" class="text-sacred-gold text-xs font-medium" (click)="openEdit(row)">Edit</button>
-                    <button type="button" class="text-red-500 text-xs font-medium" (click)="confirmDelete(row.transaction!._id)">Delete</button>
-                  } @else {
-                    <span class="text-xs text-girnar-400">—</span>
-                  }
-                </td>
+                <th class="text-center p-3">Actions</th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of filteredRows(); track row.customer._id) {
+              <tr class="border-t border-girnar-100 hover:bg-girnar-50/50">
+                <td class="p-3">
+                  @if (row.date) {
+                    {{ row.date | date:'dd/MM/yyyy' }}
+                  } @else {
+                    <span class="text-girnar-400">—</span>
+                  }
+                </td>
+                <td class="p-3 font-medium">{{ row.customer.name }}</td>
+                <td class="p-3">{{ row.customer.phoneNumber }}</td>
+                <td class="p-3 text-right text-emerald-700">
+                  {{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}
+                </td>
+                <td class="p-3 text-right text-red-600">
+                  {{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}
+                </td>
+                @if (auth.isAdmin()) {
+                  <td class="p-3 text-center space-x-2">
+                    @if (row.transaction) {
+                      <button type="button" class="text-sacred-gold text-xs font-medium" (click)="openEdit(row)">Edit</button>
+                      <button type="button" class="text-red-500 text-xs font-medium" (click)="confirmDelete(row.transaction!._id)">Delete</button>
+                    } @else {
+                      <span class="text-xs text-girnar-400">—</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    <!-- Mobile cards -->
-    <div class="md:hidden space-y-3">
-      @for (row of filteredRows(); track row.customer._id) {
-        <div class="glass-card p-4 animate-fade-in">
-          <div class="flex justify-between items-start mb-2">
-            <div>
-              <p class="font-semibold text-girnar-900">{{ row.customer.name }}</p>
-              <p class="text-xs text-girnar-500">{{ row.customer.phoneNumber }}</p>
+      <div class="md:hidden space-y-3 pb-2">
+        @for (row of filteredRows(); track row.customer._id) {
+          <div class="glass-card p-4 animate-fade-in">
+            <div class="flex justify-between items-start mb-2">
+              <div class="min-w-0 flex-1 pr-2">
+                <p class="font-semibold text-girnar-900">{{ row.customer.name }}</p>
+                <p class="text-xs text-girnar-500">{{ row.customer.phoneNumber }}</p>
+              </div>
+              @if (row.date) {
+                <span class="text-xs text-girnar-600 shrink-0">{{ row.date | date:'dd/MM/yy' }}</span>
+              }
             </div>
-            @if (row.date) {
-              <span class="text-xs text-girnar-600">{{ row.date | date:'dd/MM/yy' }}</span>
+            <div class="flex justify-between text-sm">
+              <span class="text-emerald-700">{{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+              <span class="text-red-600">{{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+            @if (auth.isAdmin() && row.transaction) {
+              <div class="flex gap-3 mt-3 pt-2 border-t border-girnar-100">
+                <button type="button" class="text-sacred-gold text-sm" (click)="openEdit(row)">Edit</button>
+                <button type="button" class="text-red-500 text-sm" (click)="confirmDelete(row.transaction!._id)">Delete</button>
+              </div>
             }
           </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-emerald-700">{{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}</span>
-            <span class="text-red-600">{{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-          @if (auth.isAdmin() && row.transaction) {
-            <div class="flex gap-3 mt-3 pt-2 border-t border-girnar-100">
-              <button type="button" class="text-sacred-gold text-sm" (click)="openEdit(row)">Edit</button>
-              <button type="button" class="text-red-500 text-sm" (click)="confirmDelete(row.transaction!._id)">Delete</button>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  }
-</div>
+        }
+      </div>
+    }
+  </div>
 
-<app-footer [totals]="totals()" [loading]="false" />
+  <app-footer [totals]="totals()" [loading]="false" />
+</div>
 
 @if (editTx()) {
   <app-modal title="Edit Transaction" (closed)="editTx.set(null)">

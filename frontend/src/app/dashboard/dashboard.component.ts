@@ -6,6 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { TransactionService } from '../services/transaction.service';
 import { CustomerService } from '../services/customer.service';
 import { ToastService } from '../services/toast.service';
+import { ExcelExportService } from '../services/excel-export.service';
 import { FooterComponent } from '../layout/footer/footer.component';
 import { LoaderComponent } from '../shared/components/loader/loader.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
@@ -48,10 +49,12 @@ export class DashboardComponent implements OnInit {
   private readonly txService = inject(TransactionService);
   private readonly customerService = inject(CustomerService);
   private readonly toast = inject(ToastService);
+  private readonly excelExport = inject(ExcelExportService);
 
   rows = signal<DashboardRow[]>([]);
   totals = signal<FundTotals | null>(null);
   loading = signal(true);
+  exporting = signal(false);
   search = signal('');
 
   private readonly defaultMonth = getDefaultSelectedMonth();
@@ -241,5 +244,21 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => this.toast.error(err.error?.message || 'Delete failed'),
     });
+  }
+
+  exportExcel() {
+    if (!this.auth.isAdmin()) return;
+    this.exporting.set(true);
+    try {
+      this.excelExport.exportFundReport(
+        this.filteredRows(),
+        this.monthLabel(),
+        this.totals()
+      );
+      this.toast.success('Excel downloaded');
+    } catch {
+      this.toast.error('Failed to export Excel');
+    }
+    this.exporting.set(false);
   }
 }
