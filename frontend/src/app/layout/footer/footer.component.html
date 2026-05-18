@@ -1,0 +1,28 @@
+<footer class="fixed bottom-0 left-0 right-0 z-40 p-2 sm:p-3">
+  <div class="max-w-7xl mx-auto glass-card p-3 sm:p-4">
+    <div class="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm font-medium text-girnar-600 mb-2">
+      <span>Credit</span>
+      <span>Debit</span>
+      <span>Total Fund</span>
+    </div>
+    @if (loading()) {
+      <div class="grid grid-cols-3 gap-2 text-center">
+        @for (i of [1,2,3]; track i) {
+          <div class="h-6 bg-girnar-100 rounded animate-pulse"></div>
+        }
+      </div>
+    } @else {
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <span class="text-emerald-700 font-semibold text-sm sm:text-base">
+          {{ totals()?.totalCredit ?? 0 | currency:'INR':'symbol':'1.0-0' }}
+        </span>
+        <span class="text-red-600 font-semibold text-sm sm:text-base">
+          {{ totals()?.totalDebit ?? 0 | currency:'INR':'symbol':'1.0-0' }}
+        </span>
+        <span class="text-girnar-900 font-bold text-sm sm:text-base">
+          {{ totals()?.totalFund ?? 0 | currency:'INR':'symbol':'1.0-0' }}
+        </span>
+      </div>
+    }
+  </div>
+</footer>

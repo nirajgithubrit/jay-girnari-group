@@ -1,0 +1,164 @@
+<app-pwa-install-banner />
+<app-notification-prompt />
+<div class="pb-28 px-4 max-w-7xl mx-auto">
+  <div class="py-4 space-y-3">
+    <p class="text-xl font-bold text-girnar-900 tracking-wide">{{ monthLabel() }}</p>
+
+    <div class="flex items-center gap-1.5 w-full flex-nowrap">
+      <button
+        type="button"
+        class="btn-secondary text-xs py-1.5 px-2 shrink-0 disabled:opacity-40"
+        (click)="prevMonth()"
+        [disabled]="!canGoPrev()"
+      >
+        ← Prev
+      </button>
+      <select
+        class="input-field py-1.5 text-xs flex-1 min-w-0"
+        [value]="selectedMonth() + '-' + selectedYear()"
+        (change)="onMonthSelect($event)"
+      >
+        @for (opt of monthOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="btn-secondary text-xs py-1.5 px-2 shrink-0 disabled:opacity-40"
+        (click)="nextMonth()"
+        [disabled]="!canGoNext()"
+      >
+        Next →
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <input
+      type="search"
+      class="input-field w-full max-w-md"
+      placeholder="Search by name or phone..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </div>
+
+  @if (loading()) {
+    <app-loader message="Loading..." />
+  } @else if (filteredRows().length === 0) {
+    <app-empty-state
+      icon="👥"
+      title="No users found"
+      description="Add users from the Users page to see them here."
+    />
+  } @else {
+    <!-- Desktop table -->
+    <div class="hidden md:block glass-card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-girnar-100/80 text-girnar-700">
+          <tr>
+            <th class="text-left p-3">Date</th>
+            <th class="text-left p-3">Name</th>
+            <th class="text-left p-3">Phone</th>
+            <th class="text-right p-3">Credit</th>
+            <th class="text-right p-3">Debit</th>
+            @if (auth.isAdmin()) {
+              <th class="text-center p-3">Actions</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of filteredRows(); track row.customer._id) {
+            <tr class="border-t border-girnar-100 hover:bg-girnar-50/50">
+              <td class="p-3">
+                @if (row.date) {
+                  {{ row.date | date:'dd/MM/yyyy' }}
+                } @else {
+                  <span class="text-girnar-400">—</span>
+                }
+              </td>
+              <td class="p-3 font-medium">{{ row.customer.name }}</td>
+              <td class="p-3">{{ row.customer.phoneNumber }}</td>
+              <td class="p-3 text-right text-emerald-700">
+                {{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="p-3 text-right text-red-600">
+                {{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              @if (auth.isAdmin()) {
+                <td class="p-3 text-center space-x-2">
+                  @if (row.transaction) {
+                    <button type="button" class="text-sacred-gold text-xs font-medium" (click)="openEdit(row)">Edit</button>
+                    <button type="button" class="text-red-500 text-xs font-medium" (click)="confirmDelete(row.transaction!._id)">Delete</button>
+                  } @else {
+                    <span class="text-xs text-girnar-400">—</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="md:hidden space-y-3">
+      @for (row of filteredRows(); track row.customer._id) {
+        <div class="glass-card p-4 animate-fade-in">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="font-semibold text-girnar-900">{{ row.customer.name }}</p>
+              <p class="text-xs text-girnar-500">{{ row.customer.phoneNumber }}</p>
+            </div>
+            @if (row.date) {
+              <span class="text-xs text-girnar-600">{{ row.date | date:'dd/MM/yy' }}</span>
+            }
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-emerald-700">{{ row.creditAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+            <span class="text-red-600">{{ row.debitAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          @if (auth.isAdmin() && row.transaction) {
+            <div class="flex gap-3 mt-3 pt-2 border-t border-girnar-100">
+              <button type="button" class="text-sacred-gold text-sm" (click)="openEdit(row)">Edit</button>
+              <button type="button" class="text-red-500 text-sm" (click)="confirmDelete(row.transaction!._id)">Delete</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-footer [totals]="totals()" [loading]="false" />
+
+@if (editTx()) {
+  <app-modal title="Edit Transaction" (closed)="editTx.set(null)">
+    <form class="space-y-4" (ngSubmit)="saveEdit()">
+      <div>
+        <label class="text-sm text-girnar-700">Date</label>
+        <input type="date" class="input-field mt-1" [(ngModel)]="editForm.date" name="date" required />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Credit</label>
+        <input type="number" min="0" class="input-field mt-1" [(ngModel)]="editForm.creditAmount" name="credit" />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Debit</label>
+        <input type="number" min="0" class="input-field mt-1" [(ngModel)]="editForm.debitAmount" name="debit" />
+      </div>
+      <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </form>
+  </app-modal>
+}
+
+@if (deleteTxId()) {
+  <app-confirm-dialog
+    title="Delete Transaction"
+    message="This action cannot be undone."
+    (confirmed)="deleteTransaction()"
+    (cancelled)="deleteTxId.set(null)"
+  />
+}

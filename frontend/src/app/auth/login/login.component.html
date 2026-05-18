@@ -1,0 +1,65 @@
+<div class="auth-gradient flex items-center justify-center min-h-screen p-4">
+  <div class="w-full max-w-md animate-slide-up">
+    <div class="text-center mb-8">
+      <img
+        src="/logo.png"
+        alt="Jay Girnari Group"
+        class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl object-contain shadow-lg mb-4"
+      />
+      <p class="text-2xl sm:text-3xl font-display font-bold text-girnar-900">Jay Girnari Group</p>
+      <p class="text-sacred-gold text-sm mt-1">Surendranagar</p>
+    </div>
+
+    <div class="glass-card p-6 sm:p-8 shadow-xl">
+      <p class="text-lg font-semibold text-girnar-800 mb-6 text-center">Sign In</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label class="block text-sm text-girnar-700 mb-1">Email</label>
+          <input type="email" formControlName="email" class="input-field" placeholder="you@email.com" />
+          @if (form.controls.email.touched && form.controls.email.errors?.['required']) {
+            <span class="text-xs text-red-500 mt-1 block">Email is required</span>
+          }
+          @if (form.controls.email.touched && form.controls.email.errors?.['email']) {
+            <span class="text-xs text-red-500 mt-1 block">Enter a valid email</span>
+          }
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-sm text-girnar-700">Password</label>
+            <a routerLink="/forgot-password" class="text-xs text-sacred-gold hover:underline">Forgot Password?</a>
+          </div>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              class="input-field pr-12"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-girnar-500 hover:text-girnar-700"
+              (click)="togglePassword()"
+              tabindex="-1"
+            >
+              {{ showPassword() ? '🙈' : '👁' }}
+            </button>
+          </div>
+          @if (form.controls.password.touched && form.controls.password.errors?.['required']) {
+            <span class="text-xs text-red-500 mt-1 block">Password is required</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary w-full mt-2" [disabled]="loading()">
+          {{ loading() ? 'Signing in...' : 'Login' }}
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-girnar-600 mt-6">
+        Don't have an account?
+        <a routerLink="/register" class="text-sacred-gold font-medium hover:underline">Register</a>
+      </p>
+    </div>
+  </div>
+</div>

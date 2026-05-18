@@ -1,0 +1,54 @@
+<header class="fixed top-0 left-0 right-0 z-40 glass-card rounded-none border-b border-girnar-200/60 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2 min-w-0">
+      <img src="/logo.png" alt="" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-contain shrink-0" />
+      <p class="text-sm sm:text-base font-semibold text-girnar-900 truncate font-display">
+        Jay Girnari Group
+      </p>
+    </div>
+
+    <nav class="flex items-center gap-2 sm:gap-4 shrink-0">
+      @if (showUsersLink()) {
+        <a
+          routerLink="/users"
+          class="text-sm text-girnar-700 font-medium px-2 sm:btn-secondary sm:py-1.5 sm:px-3"
+        >
+          Users
+        </a>
+      }
+
+      <div class="relative">
+        <button
+          type="button"
+          class="w-9 h-9 rounded-full bg-gradient-to-br from-girnar-600 to-girnar-800 text-white font-semibold text-sm shadow-md hover:shadow-lg transition"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="menuOpen()"
+        >
+          {{ initial }}
+        </button>
+
+        @if (menuOpen()) {
+          <div
+            class="absolute right-0 mt-2 w-40 glass-card py-1 shadow-xl animate-fade-in"
+            (click)="$event.stopPropagation()"
+          >
+            <p class="px-4 py-2 text-xs text-girnar-500 border-b border-girnar-100 truncate">
+              {{ auth.currentUser()?.username }}
+            </p>
+            <button
+              type="button"
+              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+              (click)="logout()"
+            >
+              Logout
+            </button>
+          </div>
+        }
+      </div>
+    </nav>
+  </div>
+</header>
+
+@if (menuOpen()) {
+  <div class="fixed inset-0 z-30" (click)="menuOpen.set(false)"></div>
+}

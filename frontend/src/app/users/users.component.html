@@ -1,0 +1,120 @@
+<div class="px-4 max-w-7xl mx-auto py-4 pb-8">
+  <div class="flex items-center gap-3 mb-6">
+    <a routerLink="/dashboard" class="btn-secondary text-sm py-1.5">← Back</a>
+    <p class="text-lg font-semibold text-girnar-900">Manage Users</p>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mb-6">
+    <button type="button" class="btn-primary text-sm" (click)="openAddUser()">+ Add User</button>
+    <button type="button" class="btn-secondary text-sm" (click)="openAddData()">+ Add User Data</button>
+  </div>
+
+  <input
+    type="search"
+    class="input-field max-w-md mb-4"
+    placeholder="Search users..."
+    [ngModel]="search()"
+    (ngModelChange)="onSearch($event)"
+  />
+
+  @if (loading()) {
+    <app-loader />
+  } @else if (customers().length === 0) {
+    <app-empty-state icon="👥" title="No users yet" description="Add your first user to get started." />
+  } @else {
+    <div class="hidden md:block glass-card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-girnar-100/80 text-girnar-700">
+          <tr>
+            <th class="text-left p-3">Name</th>
+            <th class="text-left p-3">Phone Number</th>
+            <th class="text-center p-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of customers(); track c._id) {
+            <tr class="border-t border-girnar-100">
+              <td class="p-3 font-medium">{{ c.name }}</td>
+              <td class="p-3">{{ c.phoneNumber }}</td>
+              <td class="p-3 text-center space-x-2">
+                <button type="button" class="text-sacred-gold text-xs" (click)="openEdit(c)">Edit</button>
+                <button type="button" class="text-red-500 text-xs" (click)="confirmDelete(c._id)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="md:hidden space-y-3">
+      @for (c of customers(); track c._id) {
+        <div class="glass-card p-4">
+          <p class="font-semibold">{{ c.name }}</p>
+          <p class="text-sm text-girnar-500">{{ c.phoneNumber }}</p>
+          <div class="flex gap-3 mt-2 pt-2 border-t border-girnar-100">
+            <button type="button" class="text-sacred-gold text-sm" (click)="openEdit(c)">Edit</button>
+            <button type="button" class="text-red-500 text-sm" (click)="confirmDelete(c._id)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showAddUser()) {
+  <app-modal [title]="editCustomer() ? 'Edit User' : 'Add User'" (closed)="showAddUser.set(false)">
+    <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="space-y-4">
+      <div>
+        <label class="text-sm text-girnar-700">Name</label>
+        <input type="text" formControlName="name" class="input-field mt-1" />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Phone Number</label>
+        <input type="tel" formControlName="phoneNumber" class="input-field mt-1" />
+      </div>
+      <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : 'Submit' }}
+      </button>
+    </form>
+  </app-modal>
+}
+
+@if (showAddData()) {
+  <app-modal title="Add User Data" (closed)="showAddData.set(false)">
+    <form [formGroup]="dataForm" (ngSubmit)="saveData()" class="space-y-4">
+      <div>
+        <label class="text-sm text-girnar-700">User</label>
+        <select formControlName="customerId" class="input-field mt-1">
+          <option value="">Select user</option>
+          @for (c of customers(); track c._id) {
+            <option [value]="c._id">{{ c.name }} ({{ c.phoneNumber }})</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Date</label>
+        <input type="date" formControlName="date" class="input-field mt-1" />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Credit Amount</label>
+        <input type="number" min="0" formControlName="creditAmount" class="input-field mt-1" />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Debit Amount</label>
+        <input type="number" min="0" formControlName="debitAmount" class="input-field mt-1" />
+      </div>
+      <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : 'Submit' }}
+      </button>
+    </form>
+  </app-modal>
+}
+
+@if (deleteId()) {
+  <app-confirm-dialog
+    title="Delete User"
+    message="This will also remove all related transactions."
+    (confirmed)="deleteCustomer()"
+    (cancelled)="deleteId.set(null)"
+  />
+}
