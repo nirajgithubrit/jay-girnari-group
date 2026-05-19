@@ -170,7 +170,9 @@
     <form class="space-y-4" (ngSubmit)="saveEdit()">
       <div>
         <label class="text-sm text-girnar-700">Date</label>
-        <input type="date" class="input-field mt-1" [(ngModel)]="editForm.date" name="date" required />
+        <div class="date-input-wrap mt-1">
+          <input type="date" class="input-field input-date" [(ngModel)]="editForm.date" name="date" required />
+        </div>
       </div>
       <div>
         <label class="text-sm text-girnar-700">Credit</label>

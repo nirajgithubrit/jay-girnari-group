@@ -92,9 +92,11 @@
           }
         </select>
       </div>
-      <div>
+      <div class="w-full min-w-0">
         <label class="text-sm text-girnar-700">Date</label>
-        <input type="date" formControlName="date" class="input-field mt-1" />
+        <div class="date-input-wrap mt-1">
+          <input type="date" formControlName="date" class="input-field input-date" />
+        </div>
       </div>
       <div>
         <label class="text-sm text-girnar-700">Credit Amount</label>
