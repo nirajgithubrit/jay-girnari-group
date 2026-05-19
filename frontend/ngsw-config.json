@@ -26,21 +26,5 @@
         ]
       }
     }
-  ],
-  "dataGroups": [
-    {
-      "name": "api",
-      "urls": [
-        "http://localhost:3000/api/**",
-        "http://127.0.0.1:3000/api/**",
-        "https://*.onrender.com/api/**"
-      ],
-      "cacheConfig": {
-        "strategy": "networkFirst",
-        "maxSize": 50,
-        "maxAge": "1h",
-        "timeout": "10s"
-      }
-    }
   ]
 }

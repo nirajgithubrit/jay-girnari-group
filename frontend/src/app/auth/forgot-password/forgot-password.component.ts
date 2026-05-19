@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { lockAuthPageScroll, unlockAuthPageScroll } from '../../core/utils/auth-page-body';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -17,7 +18,15 @@ function passwordMatchValidator(control: AbstractControl) {
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './forgot-password.component.html',
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit, OnDestroy {
+  ngOnInit() {
+    lockAuthPageScroll();
+  }
+
+  ngOnDestroy() {
+    unlockAuthPageScroll();
+  }
+
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);

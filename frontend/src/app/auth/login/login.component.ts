@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { lockAuthPageScroll, unlockAuthPageScroll } from '../../core/utils/auth-page-body';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +12,15 @@ import { getHttpErrorMessage } from '../../core/utils/http-error';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
+  ngOnInit() {
+    lockAuthPageScroll();
+  }
+
+  ngOnDestroy() {
+    unlockAuthPageScroll();
+  }
+
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);

@@ -11,3 +11,4 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  JGG_API_URL = "https://jay-girnari-group.onrender.com/api"

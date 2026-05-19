@@ -13,12 +13,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const corsOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
-  : true;
+  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim()).filter(Boolean)
+  : [];
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (corsOrigins.includes(origin)) return true;
+  if (/^https:\/\/[\w-]+\.netlify\.app$/i.test(origin)) return true;
+  if (process.env.NODE_ENV !== 'production') {
+    return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+  }
+  return false;
+};
 
 app.use(
   cors({
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true,
   })
 );

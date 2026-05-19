@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { apiRetryInterceptor } from './interceptors/api-retry.interceptor';
 import { AuthService } from './services/auth.service';
 
 function initAuth(auth: AuthService) {
@@ -19,7 +20,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, apiRetryInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: initAuth,
