@@ -97,6 +97,7 @@
               <th class="text-left p-3">Date</th>
               <th class="text-left p-3">Name</th>
               <th class="text-left p-3">Phone</th>
+              <th class="text-left p-3">Received By</th>
               <th class="text-right p-3">Credit</th>
               <th class="text-right p-3">Debit</th>
               @if (auth.isAdmin()) {
@@ -125,6 +126,18 @@
                     row.customer?.phoneNumber ??
                       (row.description ? "Expense" : "—")
                   }}
+                </td>
+                <td class="p-3 text-girnar-700">
+                  @if (
+                    row.transaction &&
+                    (row.transaction.creditAmount > 0 ||
+                      row.transaction.debitAmount > 0) &&
+                    row.receivedBy
+                  ) {
+                    {{ row.receivedBy }}
+                  } @else {
+                    <span class="text-girnar-400">—</span>
+                  }
                 </td>
                 <td class="p-3 text-right text-emerald-700">
                   {{ row.creditAmount | currency: "INR" : "symbol" : "1.0-0" }}
@@ -177,6 +190,16 @@
                       (row.description ? "Expense" : "—")
                   }}
                 </p>
+                @if (
+                  row.transaction &&
+                  (row.transaction.creditAmount > 0 ||
+                    row.transaction.debitAmount > 0) &&
+                  row.receivedBy
+                ) {
+                  <p class="text-[11px] text-girnar-600 mt-1">
+                    Received by: {{ row.receivedBy }}
+                  </p>
+                }
               </div>
               @if (row.date) {
                 <span class="text-xs text-girnar-600 shrink-0">{{
@@ -243,6 +266,21 @@
           name="description"
           placeholder="Expense description"
         />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Received By</label>
+        <select
+          class="input-field mt-1"
+          [(ngModel)]="editForm.receivedBy"
+          name="receivedBy"
+        >
+          @for (
+            person of ["Rohitbhai", "Hiteshbhai", "Ronakbhai", "Kalpeshbhai"];
+            track person
+          ) {
+            <option [value]="person">{{ person }}</option>
+          }
+        </select>
       </div>
       <div>
         <label class="text-sm text-girnar-700">Credit</label>

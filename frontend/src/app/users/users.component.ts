@@ -45,11 +45,14 @@ export class UsersComponent implements OnInit {
     phoneNumber: ['', Validators.required],
   });
 
+  receivedByOptions = ['Rohitbhai', 'Hiteshbhai', 'Ronakbhai', 'Kalpeshbhai'];
+
   dataForm = this.fb.nonNullable.group({
     customerId: ['', Validators.required],
     date: ['', Validators.required],
     creditAmount: [0, [Validators.min(0)]],
     debitAmount: [0, [Validators.min(0)]],
+    receivedBy: ['Rohitbhai', Validators.required],
   });
 
   expenseForm = this.fb.nonNullable.group({
@@ -126,6 +129,7 @@ export class UsersComponent implements OnInit {
       date: new Date().toISOString().split('T')[0],
       creditAmount: 0,
       debitAmount: 0,
+      receivedBy: 'Rohitbhai',
     });
     this.showAddData.set(true);
     this.showExpense.set(false);
@@ -171,6 +175,7 @@ export class UsersComponent implements OnInit {
       description: this.expenseForm.getRawValue().description,
       debitAmount: Number(this.expenseForm.getRawValue().debitAmount || 0),
       creditAmount: 0,
+      receivedBy: 'Rohitbhai',
     };
     this.transactionService.create(payload).subscribe({
       next: () => {

@@ -68,6 +68,7 @@ export class DashboardComponent implements OnInit {
   editForm = {
     date: '',
     description: '',
+    receivedBy: 'Rohitbhai',
     creditAmount: 0,
     debitAmount: 0,
   };
@@ -96,7 +97,13 @@ export class DashboardComponent implements OnInit {
       const customerName = r.customer?.name?.toLowerCase() ?? '';
       const phone = r.customer?.phoneNumber?.toLowerCase() ?? '';
       const description = (r.description || '').toLowerCase();
-      return customerName.includes(q) || phone.includes(q) || description.includes(q);
+      const receivedBy = (r.receivedBy || '').toLowerCase();
+      return (
+        customerName.includes(q) ||
+        phone.includes(q) ||
+        description.includes(q) ||
+        receivedBy.includes(q)
+      );
     });
   });
 
@@ -147,6 +154,7 @@ export class DashboardComponent implements OnInit {
           return {
             customer,
             description: tx?.description ?? '',
+            receivedBy: tx?.receivedBy ?? '',
             transaction: tx,
             creditAmount: tx?.creditAmount ?? 0,
             debitAmount: tx?.debitAmount ?? 0,
@@ -159,6 +167,7 @@ export class DashboardComponent implements OnInit {
           .map((t) => ({
             customer: null,
             description: t.description || 'Expense',
+            receivedBy: t.receivedBy ?? '',
             transaction: t,
             creditAmount: t.creditAmount ?? 0,
             debitAmount: t.debitAmount ?? 0,
@@ -220,6 +229,7 @@ export class DashboardComponent implements OnInit {
     this.editForm = {
       date: new Date(t.date).toISOString().split('T')[0],
       description: t.description ?? '',
+      receivedBy: t.receivedBy ?? 'Rohitbhai',
       creditAmount: t.creditAmount,
       debitAmount: t.debitAmount,
     };

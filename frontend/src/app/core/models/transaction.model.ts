@@ -4,6 +4,7 @@ export interface Transaction {
   _id: string;
   customerId: Customer | string | null;
   description?: string;
+  receivedBy?: string;
   date: string;
   creditAmount: number;
   debitAmount: number;
@@ -16,6 +17,7 @@ export interface Transaction {
 export interface TransactionForm {
   customerId?: string | null;
   description?: string;
+  receivedBy?: string;
   date: string;
   creditAmount?: number;
   debitAmount?: number;

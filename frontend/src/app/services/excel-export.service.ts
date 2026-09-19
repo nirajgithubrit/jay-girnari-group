@@ -10,7 +10,9 @@ export class ExcelExportService {
     monthLabel: string,
     overallTotals: FundTotals | null
   ): void {
-    const sheetData: (string | number)[][] = [['Date', 'Name / Description', 'Credit', 'Debit']];
+    const sheetData: (string | number)[][] = [
+      ['Date', 'Name / Description', 'Received By', 'Credit', 'Debit'],
+    ];
 
     for (const row of rows) {
       const dateStr = row.date
@@ -21,7 +23,8 @@ export class ExcelExportService {
         })
         : '—';
       const nameText = row.customer?.name ?? (row.description || 'Expense');
-      sheetData.push([dateStr, nameText, row.creditAmount, row.debitAmount]);
+      const receivedBy = row.receivedBy || '';
+      sheetData.push([dateStr, nameText, receivedBy, row.creditAmount, row.debitAmount]);
     }
 
     const monthCredit = rows.reduce((s, r) => s + r.creditAmount, 0);
@@ -43,7 +46,7 @@ export class ExcelExportService {
     }
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 14 }];
+    ws['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 18 }, { wch: 14 }, { wch: 14 }];
 
     const wb = XLSX.utils.book_new();
     const sheetName = monthLabel.replace(/\s*-\s*/g, ' ').substring(0, 31);

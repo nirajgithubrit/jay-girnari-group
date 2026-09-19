@@ -19,7 +19,7 @@
         class="btn-secondary text-sm"
         (click)="openAddData()"
       >
-        + Add User Data
+        + Add Trans.
       </button>
       <button
         type="button"
@@ -166,6 +166,14 @@
           formControlName="creditAmount"
           class="input-field mt-1"
         />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Received By</label>
+        <select formControlName="receivedBy" class="input-field mt-1">
+          @for (person of receivedByOptions; track person) {
+            <option [value]="person">{{ person }}</option>
+          }
+        </select>
       </div>
       <div>
         <label class="text-sm text-girnar-700">Debit Amount</label>
