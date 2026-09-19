@@ -175,7 +175,6 @@ export class UsersComponent implements OnInit {
       description: this.expenseForm.getRawValue().description,
       debitAmount: Number(this.expenseForm.getRawValue().debitAmount || 0),
       creditAmount: 0,
-      receivedBy: 'Rohitbhai',
     };
     this.transactionService.create(payload).subscribe({
       next: () => {

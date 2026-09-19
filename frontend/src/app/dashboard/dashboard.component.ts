@@ -57,11 +57,11 @@ export class DashboardComponent implements OnInit {
   exporting = signal(false);
   search = signal('');
 
-  private readonly defaultMonth = getDefaultSelectedMonth();
-  selectedMonth = signal(this.defaultMonth.month);
-  selectedYear = signal(this.defaultMonth.year);
+  selectedMonth = signal(new Date().getMonth() + 1);
+  selectedYear = signal(new Date().getFullYear());
 
   editTx = signal<Transaction | null>(null);
+  editingExpense = signal(false);
   deleteTxId = signal<string | null>(null);
   saving = signal(false);
 
@@ -74,6 +74,10 @@ export class DashboardComponent implements OnInit {
   };
 
   readonly monthOptions = buildMonthOptions();
+
+  readonly selectedMonthValue = computed(
+    () => `${this.selectedMonth()}-${this.selectedYear()}`,
+  );
 
   monthLabel = computed(() =>
     formatMonthLabel(this.selectedMonth(), this.selectedYear())
@@ -108,8 +112,15 @@ export class DashboardComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.setCurrentMonthSelection();
     this.loadData();
     this.loadTotals();
+  }
+
+  private setCurrentMonthSelection() {
+    const current = getDefaultSelectedMonth();
+    this.selectedMonth.set(current.month);
+    this.selectedYear.set(current.year);
   }
 
   loadTotals() {
@@ -225,11 +236,14 @@ export class DashboardComponent implements OnInit {
   openEdit(row: DashboardRow) {
     const t = row.transaction;
     if (!t) return;
+
+    const isExpense = !row.customer;
+    this.editingExpense.set(isExpense);
     this.editTx.set(t);
     this.editForm = {
       date: new Date(t.date).toISOString().split('T')[0],
       description: t.description ?? '',
-      receivedBy: t.receivedBy ?? 'Rohitbhai',
+      receivedBy: isExpense ? '' : (t.receivedBy ?? 'Rohitbhai'),
       creditAmount: t.creditAmount,
       debitAmount: t.debitAmount,
     };
@@ -239,18 +253,35 @@ export class DashboardComponent implements OnInit {
     const t = this.editTx();
     if (!t) return;
     this.saving.set(true);
-    this.txService.update(t._id, {
-      ...this.editForm,
+
+    const isExpense = this.editingExpense();
+    const payload: any = {
+      date: this.editForm.date,
+      creditAmount: Number(this.editForm.creditAmount || 0),
+      debitAmount: Number(this.editForm.debitAmount || 0),
       customerId:
         typeof t.customerId === 'string'
           ? t.customerId
           : t.customerId && typeof t.customerId === 'object'
             ? t.customerId._id
             : null,
-    }).subscribe({
+    };
+
+    if (isExpense) {
+      payload.description = this.editForm.description || 'Expense';
+      payload.customerId = null;
+      delete payload.creditAmount;
+      payload.receivedBy = '';
+    } else {
+      payload.description = '';
+      payload.receivedBy = this.editForm.receivedBy || 'Rohitbhai';
+    }
+
+    this.txService.update(t._id, payload).subscribe({
       next: () => {
-        this.toast.success('Transaction updated');
+        this.toast.success(isExpense ? 'Expense updated' : 'Transaction updated');
         this.editTx.set(null);
+        this.editingExpense.set(false);
         this.loadData();
         this.loadTotals();
         this.saving.set(false);

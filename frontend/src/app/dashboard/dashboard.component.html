@@ -54,7 +54,7 @@
       </button>
       <select
         class="input-field py-1.5 text-xs flex-1 min-w-0"
-        [value]="selectedMonth() + '-' + selectedYear()"
+        [value]="selectedMonthValue()"
         (change)="onMonthSelect($event)"
       >
         @for (opt of monthOptions; track opt.value) {
@@ -191,6 +191,7 @@
                   }}
                 </p>
                 @if (
+                  row.customer &&
                   row.transaction &&
                   (row.transaction.creditAmount > 0 ||
                     row.transaction.debitAmount > 0) &&
@@ -243,70 +244,110 @@
 </div>
 
 @if (editTx()) {
-  <app-modal title="Edit Transaction" (closed)="editTx.set(null)">
-    <form class="space-y-4" (ngSubmit)="saveEdit()">
-      <div>
-        <label class="text-sm text-girnar-700">Date</label>
-        <div class="date-input-wrap mt-1">
+  @if (editingExpense()) {
+    <app-modal
+      title="Edit Expense"
+      (closed)="editTx.set(null); editingExpense.set(false)"
+    >
+      <form class="space-y-4" (ngSubmit)="saveEdit()">
+        <div>
+          <label class="text-sm text-girnar-700">Date</label>
+          <div class="date-input-wrap mt-1">
+            <input
+              type="date"
+              class="input-field input-date"
+              [(ngModel)]="editForm.date"
+              name="date"
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label class="text-sm text-girnar-700">Description</label>
           <input
-            type="date"
-            class="input-field input-date"
-            [(ngModel)]="editForm.date"
-            name="date"
+            type="text"
+            class="input-field mt-1"
+            [(ngModel)]="editForm.description"
+            name="expenseDescription"
+            placeholder="Expense description"
             required
           />
         </div>
-      </div>
-      <div>
-        <label class="text-sm text-girnar-700">Description</label>
-        <input
-          type="text"
-          class="input-field mt-1"
-          [(ngModel)]="editForm.description"
-          name="description"
-          placeholder="Expense description"
-        />
-      </div>
-      <div>
-        <label class="text-sm text-girnar-700">Received By</label>
-        <select
-          class="input-field mt-1"
-          [(ngModel)]="editForm.receivedBy"
-          name="receivedBy"
-        >
-          @for (
-            person of ["Rohitbhai", "Hiteshbhai", "Ronakbhai", "Kalpeshbhai"];
-            track person
-          ) {
-            <option [value]="person">{{ person }}</option>
-          }
-        </select>
-      </div>
-      <div>
-        <label class="text-sm text-girnar-700">Credit</label>
-        <input
-          type="number"
-          min="0"
-          class="input-field mt-1"
-          [(ngModel)]="editForm.creditAmount"
-          name="credit"
-        />
-      </div>
-      <div>
-        <label class="text-sm text-girnar-700">Debit</label>
-        <input
-          type="number"
-          min="0"
-          class="input-field mt-1"
-          [(ngModel)]="editForm.debitAmount"
-          name="debit"
-        />
-      </div>
-      <button type="submit" class="btn-primary w-full" [disabled]="saving()">
-        {{ saving() ? "Saving..." : "Save Changes" }}
-      </button>
-    </form>
-  </app-modal>
+        <div>
+          <label class="text-sm text-girnar-700">Debit Amount</label>
+          <input
+            type="number"
+            min="0"
+            class="input-field mt-1"
+            [(ngModel)]="editForm.debitAmount"
+            name="expenseDebit"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+          {{ saving() ? "Saving..." : "Save Changes" }}
+        </button>
+      </form>
+    </app-modal>
+  } @else {
+    <app-modal
+      title="Edit Transaction"
+      (closed)="editTx.set(null); editingExpense.set(false)"
+    >
+      <form class="space-y-4" (ngSubmit)="saveEdit()">
+        <div>
+          <label class="text-sm text-girnar-700">Date</label>
+          <div class="date-input-wrap mt-1">
+            <input
+              type="date"
+              class="input-field input-date"
+              [(ngModel)]="editForm.date"
+              name="date"
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label class="text-sm text-girnar-700">Received By</label>
+          <select
+            class="input-field mt-1"
+            [(ngModel)]="editForm.receivedBy"
+            name="receivedBy"
+          >
+            @for (
+              person of ["Rohitbhai", "Hiteshbhai", "Ronakbhai", "Kalpeshbhai"];
+              track person
+            ) {
+              <option [value]="person">{{ person }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-girnar-700">Credit</label>
+          <input
+            type="number"
+            min="0"
+            class="input-field mt-1"
+            [(ngModel)]="editForm.creditAmount"
+            name="credit"
+          />
+        </div>
+        <div>
+          <label class="text-sm text-girnar-700">Debit</label>
+          <input
+            type="number"
+            min="0"
+            class="input-field mt-1"
+            [(ngModel)]="editForm.debitAmount"
+            name="debit"
+          />
+        </div>
+        <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+          {{ saving() ? "Saving..." : "Save Changes" }}
+        </button>
+      </form>
+    </app-modal>
+  }
 }
 
 @if (deleteTxId()) {

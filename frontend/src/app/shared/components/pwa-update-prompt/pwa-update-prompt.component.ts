@@ -63,6 +63,14 @@ import { PwaUpdateService } from '../../../services/pwa-update.service';
               {{ pwaUpdate.updating() ? 'Updating…' : 'Update' }}
             </button>
           </div>
+          <button
+            type="button"
+            class="w-full mt-3 text-xs font-medium text-sacred-gold underline underline-offset-2"
+            (click)="forceUpdateNow()"
+            [disabled]="pwaUpdate.updating()"
+          >
+            Force update now
+          </button>
         </div>
       </div>
     }
@@ -76,6 +84,11 @@ export class PwaUpdatePromptComponent implements OnInit {
   }
 
   onUpdate() {
+    this.pwaUpdate.applyUpdate();
+  }
+
+  forceUpdateNow() {
+    this.pwaUpdate.forceCheckForUpdate();
     this.pwaUpdate.applyUpdate();
   }
 }

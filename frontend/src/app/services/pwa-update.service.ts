@@ -65,15 +65,46 @@ export class PwaUpdateService {
   }
 
   async applyUpdate(): Promise<void> {
-    if (!this.swUpdate?.isEnabled || this.updating()) return;
+    if (this.updating()) return;
 
     this.updating.set(true);
     try {
-      await this.swUpdate.activateUpdate();
+      if (this.swUpdate?.isEnabled) {
+        await this.swUpdate.checkForUpdate();
+        await this.swUpdate.activateUpdate();
+      }
+
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.update()));
+      }
+
       document.location.reload();
     } catch {
       this.updating.set(false);
       document.location.reload();
+    }
+  }
+
+  async forceCheckForUpdate(): Promise<void> {
+    this.updateAvailable.set(false);
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.update();
+        }
+      }
+
+      if (this.swUpdate?.isEnabled) {
+        await this.swUpdate.checkForUpdate();
+      }
+
+      this.updateAvailable.set(true);
+    } catch {
+      this.updateAvailable.set(false);
     }
   }
 }
