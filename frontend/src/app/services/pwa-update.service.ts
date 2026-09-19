@@ -7,12 +7,21 @@ import { filter, interval } from 'rxjs';
 export class PwaUpdateService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly swUpdate = inject(SwUpdate, { optional: true });
+  private initialized = false;
 
   readonly updateAvailable = signal(false);
   readonly updating = signal(false);
 
   init(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.swUpdate?.isEnabled) return;
+    if (!isPlatformBrowser(this.platformId) || this.initialized) return;
+
+    this.initialized = true;
+
+    if (!this.swUpdate?.isEnabled) {
+      // The service worker may still be registering. Retry shortly so installed PWAs still detect the update.
+      setTimeout(() => this.init(), 5000);
+      return;
+    }
 
     this.swUpdate.versionUpdates
       .pipe(filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
@@ -24,18 +33,26 @@ export class PwaUpdateService {
       this.updateAvailable.set(true);
     });
 
-    // Check when user returns to the app (e.g. opens PWA from home screen)
+    // Check when user returns to the app or switches back to the installed PWA
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         this.checkForUpdate();
       }
     });
 
-    // Periodic check while app is open (every 30 minutes)
+    window.addEventListener('focus', () => this.checkForUpdate());
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        this.checkForUpdate();
+      });
+    }
+
+    // Keep checking while app stays open and when a PWA is reopened.
     interval(30 * 60 * 1000).subscribe(() => this.checkForUpdate());
 
-    // Initial check after service worker is ready
-    setTimeout(() => this.checkForUpdate(), 10_000);
+    // Immediate check after startup so the installed app can detect a fresh deployment.
+    setTimeout(() => this.checkForUpdate(), 1500);
   }
 
   checkForUpdate(): void {
