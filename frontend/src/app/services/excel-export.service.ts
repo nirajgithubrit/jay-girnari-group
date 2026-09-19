@@ -10,17 +10,18 @@ export class ExcelExportService {
     monthLabel: string,
     overallTotals: FundTotals | null
   ): void {
-    const sheetData: (string | number)[][] = [['Date', 'Name', 'Credit', 'Debit']];
+    const sheetData: (string | number)[][] = [['Date', 'Name / Description', 'Credit', 'Debit']];
 
     for (const row of rows) {
       const dateStr = row.date
         ? new Date(row.date).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
         : '—';
-      sheetData.push([dateStr, row.customer.name, row.creditAmount, row.debitAmount]);
+      const nameText = row.customer?.name ?? (row.description || 'Expense');
+      sheetData.push([dateStr, nameText, row.creditAmount, row.debitAmount]);
     }
 
     const monthCredit = rows.reduce((s, r) => s + r.creditAmount, 0);

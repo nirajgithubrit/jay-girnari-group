@@ -1,11 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Customer',
-      required: true,
+      ref: "Customer",
+      default: null,
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    receivedBy: {
+      type: String,
+      trim: true,
+      default: "Rohitbhai",
     },
     date: {
       type: Date,
@@ -33,14 +43,14 @@ const transactionSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 transactionSchema.index({ month: 1, year: 1 });
 transactionSchema.index({ customerId: 1, month: 1, year: 1 });
 
-export default mongoose.model('Transaction', transactionSchema);
+export default mongoose.model("Transaction", transactionSchema);

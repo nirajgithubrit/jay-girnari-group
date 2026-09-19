@@ -1,12 +1,33 @@
-<div class="h-full flex flex-col min-h-0 overflow-y-auto dashboard-scroll max-w-7xl mx-auto w-full">
-  <div class="flex flex-col gap-3 mb-3 pt-2 md:mb-4 md:flex-row md:items-center md:justify-between md:gap-4">
+<div
+  class="h-full flex flex-col min-h-0 overflow-y-auto dashboard-scroll max-w-7xl mx-auto w-full"
+>
+  <div
+    class="flex flex-col gap-3 mb-3 pt-2 md:mb-4 md:flex-row md:items-center md:justify-between md:gap-4"
+  >
     <div class="flex items-center gap-3 min-w-0">
-      <a routerLink="/dashboard" class="btn-secondary text-sm py-1.5 shrink-0">← Back</a>
+      <a routerLink="/dashboard" class="btn-secondary text-sm py-1.5 shrink-0"
+        >← Back</a
+      >
       <p class="text-lg font-semibold text-girnar-900">Manage Users</p>
     </div>
     <div class="flex flex-wrap gap-2 shrink-0">
-      <button type="button" class="btn-primary text-sm" (click)="openAddUser()">+ Add User</button>
-      <button type="button" class="btn-secondary text-sm" (click)="openAddData()">+ Add User Data</button>
+      <button type="button" class="btn-primary text-sm" (click)="openAddUser()">
+        + Add User
+      </button>
+      <button
+        type="button"
+        class="btn-secondary text-sm"
+        (click)="openAddData()"
+      >
+        + Add User Data
+      </button>
+      <button
+        type="button"
+        class="btn-secondary text-sm"
+        (click)="openAddExpense()"
+      >
+        + Add Exp.
+      </button>
     </div>
   </div>
 
@@ -21,7 +42,11 @@
   @if (loading()) {
     <app-loader />
   } @else if (customers().length === 0) {
-    <app-empty-state icon="👥" title="No users yet" description="Add your first user to get started." />
+    <app-empty-state
+      icon="👥"
+      title="No users yet"
+      description="Add your first user to get started."
+    />
   } @else {
     <div class="hidden md:block glass-card overflow-hidden mb-6">
       <table class="w-full text-sm">
@@ -38,8 +63,20 @@
               <td class="p-3 font-medium">{{ c.name }}</td>
               <td class="p-3">{{ c.phoneNumber }}</td>
               <td class="p-3 text-center space-x-2">
-                <button type="button" class="text-sacred-gold text-xs" (click)="openEdit(c)">Edit</button>
-                <button type="button" class="text-red-500 text-xs" (click)="confirmDelete(c._id)">Delete</button>
+                <button
+                  type="button"
+                  class="text-sacred-gold text-xs"
+                  (click)="openEdit(c)"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="text-red-500 text-xs"
+                  (click)="confirmDelete(c._id)"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           }
@@ -53,8 +90,20 @@
           <p class="font-semibold">{{ c.name }}</p>
           <p class="text-sm text-girnar-500">{{ c.phoneNumber }}</p>
           <div class="flex gap-3 mt-2 pt-2 border-t border-girnar-100">
-            <button type="button" class="text-sacred-gold text-sm" (click)="openEdit(c)">Edit</button>
-            <button type="button" class="text-red-500 text-sm" (click)="confirmDelete(c._id)">Delete</button>
+            <button
+              type="button"
+              class="text-sacred-gold text-sm"
+              (click)="openEdit(c)"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              class="text-red-500 text-sm"
+              (click)="confirmDelete(c._id)"
+            >
+              Delete
+            </button>
           </div>
         </div>
       }
@@ -63,7 +112,10 @@
 </div>
 
 @if (showAddUser()) {
-  <app-modal [title]="editCustomer() ? 'Edit User' : 'Add User'" (closed)="showAddUser.set(false)">
+  <app-modal
+    [title]="editCustomer() ? 'Edit User' : 'Add User'"
+    (closed)="showAddUser.set(false)"
+  >
     <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="space-y-4">
       <div>
         <label class="text-sm text-girnar-700">Name</label>
@@ -71,10 +123,14 @@
       </div>
       <div>
         <label class="text-sm text-girnar-700">Phone Number</label>
-        <input type="tel" formControlName="phoneNumber" class="input-field mt-1" />
+        <input
+          type="tel"
+          formControlName="phoneNumber"
+          class="input-field mt-1"
+        />
       </div>
       <button type="submit" class="btn-primary w-full" [disabled]="saving()">
-        {{ saving() ? 'Saving...' : 'Submit' }}
+        {{ saving() ? "Saving..." : "Submit" }}
       </button>
     </form>
   </app-modal>
@@ -95,19 +151,75 @@
       <div class="w-full min-w-0">
         <label class="text-sm text-girnar-700">Date</label>
         <div class="date-input-wrap mt-1">
-          <input type="date" formControlName="date" class="input-field input-date" />
+          <input
+            type="date"
+            formControlName="date"
+            class="input-field input-date"
+          />
         </div>
       </div>
       <div>
         <label class="text-sm text-girnar-700">Credit Amount</label>
-        <input type="number" min="0" formControlName="creditAmount" class="input-field mt-1" />
+        <input
+          type="number"
+          min="0"
+          formControlName="creditAmount"
+          class="input-field mt-1"
+        />
       </div>
       <div>
         <label class="text-sm text-girnar-700">Debit Amount</label>
-        <input type="number" min="0" formControlName="debitAmount" class="input-field mt-1" />
+        <input
+          type="number"
+          min="0"
+          formControlName="debitAmount"
+          class="input-field mt-1"
+        />
       </div>
       <button type="submit" class="btn-primary w-full" [disabled]="saving()">
-        {{ saving() ? 'Saving...' : 'Submit' }}
+        {{ saving() ? "Saving..." : "Submit" }}
+      </button>
+    </form>
+  </app-modal>
+}
+
+@if (showExpense()) {
+  <app-modal title="Add Expense" (closed)="showExpense.set(false)">
+    <form
+      [formGroup]="expenseForm"
+      (ngSubmit)="saveExpense()"
+      class="space-y-4"
+    >
+      <div class="w-full min-w-0">
+        <label class="text-sm text-girnar-700">Date</label>
+        <div class="date-input-wrap mt-1">
+          <input
+            type="date"
+            formControlName="date"
+            class="input-field input-date"
+          />
+        </div>
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Description</label>
+        <input
+          type="text"
+          formControlName="description"
+          class="input-field mt-1"
+          placeholder="Enter expense description"
+        />
+      </div>
+      <div>
+        <label class="text-sm text-girnar-700">Debit Amount</label>
+        <input
+          type="number"
+          min="0"
+          formControlName="debitAmount"
+          class="input-field mt-1"
+        />
+      </div>
+      <button type="submit" class="btn-primary w-full" [disabled]="saving()">
+        {{ saving() ? "Saving..." : "Save" }}
       </button>
     </form>
   </app-modal>

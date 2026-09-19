@@ -1,7 +1,7 @@
-import Transaction from '../models/Transaction.js';
-import Customer from '../models/Customer.js';
-import { AppError } from '../utils/AppError.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import Transaction from "../models/Transaction.js";
+import Customer from "../models/Customer.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getMonthYear = (date) => {
   const d = new Date(date);
@@ -9,15 +9,32 @@ const getMonthYear = (date) => {
 };
 
 export const createTransaction = asyncHandler(async (req, res) => {
-  const { customerId, date, creditAmount = 0, debitAmount = 0 } = req.body;
+  const {
+    customerId,
+    description,
+    receivedBy = "Rohitbhai",
+    date,
+    creditAmount = 0,
+    debitAmount = 0,
+  } = req.body;
+  const normalizedDescription =
+    typeof description === "string" ? description.trim() : "";
 
-  const customer = await Customer.findById(customerId);
-  if (!customer) throw new AppError('Customer not found', 404);
+  if (!customerId && !normalizedDescription) {
+    throw new AppError("Description is required for expense entries", 400);
+  }
+
+  if (customerId) {
+    const customer = await Customer.findById(customerId);
+    if (!customer) throw new AppError("Customer not found", 404);
+  }
 
   const { month, year } = getMonthYear(date);
 
   const transaction = await Transaction.create({
-    customerId,
+    customerId: customerId || null,
+    description: normalizedDescription,
+    receivedBy: receivedBy || "Rohitbhai",
     date: new Date(date),
     creditAmount: Number(creditAmount) || 0,
     debitAmount: Number(debitAmount) || 0,
@@ -27,8 +44,8 @@ export const createTransaction = asyncHandler(async (req, res) => {
   });
 
   const populated = await Transaction.findById(transaction._id).populate(
-    'customerId',
-    'name phoneNumber'
+    "customerId",
+    "name phoneNumber",
   );
 
   res.status(201).json({ success: true, data: populated });
@@ -42,16 +59,17 @@ export const getMonthlyTransactions = asyncHandler(async (req, res) => {
   const filter = { month, year };
 
   let transactions = await Transaction.find(filter)
-    .populate('customerId', 'name phoneNumber')
+    .populate("customerId", "name phoneNumber")
     .sort({ date: -1 })
     .lean();
 
   if (search) {
-    const regex = new RegExp(search, 'i');
+    const regex = new RegExp(search, "i");
     transactions = transactions.filter(
       (t) =>
-        regex.test(t.customerId?.name || '') ||
-        regex.test(t.customerId?.phoneNumber || '')
+        regex.test(t.customerId?.name || "") ||
+        regex.test(t.customerId?.phoneNumber || "") ||
+        regex.test(t.description || ""),
     );
   }
 
@@ -74,8 +92,33 @@ export const getMonthlyTransactions = asyncHandler(async (req, res) => {
 });
 
 export const updateTransaction = asyncHandler(async (req, res) => {
-  const { date, creditAmount, debitAmount } = req.body;
+  const {
+    customerId,
+    description,
+    receivedBy,
+    date,
+    creditAmount,
+    debitAmount,
+  } = req.body;
   const update = {};
+
+  if (customerId !== undefined) {
+    update.customerId = customerId || null;
+    if (customerId) {
+      const customer = await Customer.findById(customerId);
+      if (!customer) throw new AppError("Customer not found", 404);
+    }
+  }
+
+  if (description !== undefined) {
+    const normalizedDescription =
+      typeof description === "string" ? description.trim() : "";
+    update.description = normalizedDescription;
+  }
+
+  if (receivedBy !== undefined) {
+    update.receivedBy = receivedBy || "Rohitbhai";
+  }
 
   if (date) {
     update.date = new Date(date);
@@ -86,19 +129,23 @@ export const updateTransaction = asyncHandler(async (req, res) => {
   if (creditAmount !== undefined) update.creditAmount = Number(creditAmount);
   if (debitAmount !== undefined) update.debitAmount = Number(debitAmount);
 
-  const transaction = await Transaction.findByIdAndUpdate(req.params.id, update, {
-    new: true,
-    runValidators: true,
-  }).populate('customerId', 'name phoneNumber');
+  const transaction = await Transaction.findByIdAndUpdate(
+    req.params.id,
+    update,
+    {
+      new: true,
+      runValidators: true,
+    },
+  ).populate("customerId", "name phoneNumber");
 
-  if (!transaction) throw new AppError('Transaction not found', 404);
+  if (!transaction) throw new AppError("Transaction not found", 404);
   res.status(200).json({ success: true, data: transaction });
 });
 
 export const deleteTransaction = asyncHandler(async (req, res) => {
   const transaction = await Transaction.findByIdAndDelete(req.params.id);
-  if (!transaction) throw new AppError('Transaction not found', 404);
-  res.status(200).json({ success: true, message: 'Transaction deleted' });
+  if (!transaction) throw new AppError("Transaction not found", 404);
+  res.status(200).json({ success: true, message: "Transaction deleted" });
 });
 
 export const getTotals = asyncHandler(async (req, res) => {
@@ -107,8 +154,8 @@ export const getTotals = asyncHandler(async (req, res) => {
     {
       $group: {
         _id: null,
-        totalCredit: { $sum: '$creditAmount' },
-        totalDebit: { $sum: '$debitAmount' },
+        totalCredit: { $sum: "$creditAmount" },
+        totalDebit: { $sum: "$debitAmount" },
       },
     },
   ]);

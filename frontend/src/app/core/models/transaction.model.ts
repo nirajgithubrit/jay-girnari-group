@@ -2,7 +2,8 @@ import { Customer } from './customer.model';
 
 export interface Transaction {
   _id: string;
-  customerId: Customer | string;
+  customerId: Customer | string | null;
+  description?: string;
   date: string;
   creditAmount: number;
   debitAmount: number;
@@ -13,10 +14,11 @@ export interface Transaction {
 }
 
 export interface TransactionForm {
-  customerId: string;
+  customerId?: string | null;
+  description?: string;
   date: string;
-  creditAmount: number;
-  debitAmount: number;
+  creditAmount?: number;
+  debitAmount?: number;
 }
 
 export interface FundTotals {

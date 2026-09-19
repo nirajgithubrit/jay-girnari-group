@@ -2,7 +2,8 @@ import { Customer } from './customer.model';
 import { Transaction } from './transaction.model';
 
 export interface DashboardRow {
-  customer: Customer;
+  customer: Customer | null;
+  description: string;
   transaction: Transaction | null;
   creditAmount: number;
   debitAmount: number;

@@ -1,37 +1,52 @@
-import { Router } from 'express';
-import { body } from 'express-validator';
+import { Router } from "express";
+import { body } from "express-validator";
 import {
   createTransaction,
   getMonthlyTransactions,
   updateTransaction,
   deleteTransaction,
   getTotals,
-} from '../controllers/transactionController.js';
-import { protect, restrictTo } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+} from "../controllers/transactionController.js";
+import { protect, restrictTo } from "../middleware/auth.js";
+import { validate } from "../middleware/validate.js";
 
 const router = Router();
 
 router.use(protect);
 
-router.get('/', getMonthlyTransactions);
-router.get('/totals', getTotals);
+router.get("/", getMonthlyTransactions);
+router.get("/totals", getTotals);
 
-router.use(restrictTo('admin'));
+router.use(restrictTo("admin"));
 
 router.post(
-  '/',
+  "/",
   [
-    body('customerId').notEmpty().withMessage('Customer is required'),
-    body('date').isISO8601().withMessage('Valid date is required'),
-    body('creditAmount').optional().isFloat({ min: 0 }).withMessage('Credit must be a positive number'),
-    body('debitAmount').optional().isFloat({ min: 0 }).withMessage('Debit must be a positive number'),
+    body("customerId").optional({ nullable: true, checkFalsy: false }),
+    body("description")
+      .optional({ values: "falsy" })
+      .isString()
+      .trim()
+      .withMessage("Description must be text"),
+    body("receivedBy")
+      .optional()
+      .isIn(["Rohitbhai", "Hiteshbhai", "Ronakbhai", "Kalpeshbhai"])
+      .withMessage("Received by is invalid"),
+    body("date").isISO8601().withMessage("Valid date is required"),
+    body("creditAmount")
+      .optional()
+      .isFloat({ min: 0 })
+      .withMessage("Credit must be a positive number"),
+    body("debitAmount")
+      .optional()
+      .isFloat({ min: 0 })
+      .withMessage("Debit must be a positive number"),
   ],
   validate,
-  createTransaction
+  createTransaction,
 );
 
-router.put('/:id', updateTransaction);
-router.delete('/:id', deleteTransaction);
+router.put("/:id", updateTransaction);
+router.delete("/:id", deleteTransaction);
 
 export default router;

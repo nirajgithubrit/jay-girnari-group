@@ -35,6 +35,7 @@ export class UsersComponent implements OnInit {
   search = signal('');
   showAddUser = signal(false);
   showAddData = signal(false);
+  showExpense = signal(false);
   editCustomer = signal<Customer | null>(null);
   deleteId = signal<string | null>(null);
   saving = signal(false);
@@ -49,6 +50,12 @@ export class UsersComponent implements OnInit {
     date: ['', Validators.required],
     creditAmount: [0, [Validators.min(0)]],
     debitAmount: [0, [Validators.min(0)]],
+  });
+
+  expenseForm = this.fb.nonNullable.group({
+    date: ['', Validators.required],
+    description: ['', [Validators.required, Validators.minLength(2)]],
+    debitAmount: [0, [Validators.required, Validators.min(1)]],
   });
 
   ngOnInit() {
@@ -121,6 +128,17 @@ export class UsersComponent implements OnInit {
       debitAmount: 0,
     });
     this.showAddData.set(true);
+    this.showExpense.set(false);
+  }
+
+  openAddExpense() {
+    this.expenseForm.reset({
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+      debitAmount: 0,
+    });
+    this.showExpense.set(true);
+    this.showAddData.set(false);
   }
 
   saveData() {
@@ -137,6 +155,31 @@ export class UsersComponent implements OnInit {
       },
       error: (err) => {
         this.toast.error(err.error?.message || 'Failed to add data');
+        this.saving.set(false);
+      },
+    });
+  }
+
+  saveExpense() {
+    if (this.expenseForm.invalid) {
+      this.expenseForm.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    const payload = {
+      date: this.expenseForm.getRawValue().date,
+      description: this.expenseForm.getRawValue().description,
+      debitAmount: Number(this.expenseForm.getRawValue().debitAmount || 0),
+      creditAmount: 0,
+    };
+    this.transactionService.create(payload).subscribe({
+      next: () => {
+        this.toast.success('Expense added');
+        this.showExpense.set(false);
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Failed to add expense');
         this.saving.set(false);
       },
     });

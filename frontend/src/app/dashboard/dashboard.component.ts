@@ -67,6 +67,7 @@ export class DashboardComponent implements OnInit {
 
   editForm = {
     date: '',
+    description: '',
     creditAmount: 0,
     debitAmount: 0,
   };
@@ -91,11 +92,12 @@ export class DashboardComponent implements OnInit {
   filteredRows = computed(() => {
     const q = this.search().toLowerCase().trim();
     if (!q) return this.rows();
-    return this.rows().filter(
-      (r) =>
-        r.customer.name.toLowerCase().includes(q) ||
-        r.customer.phoneNumber.toLowerCase().includes(q)
-    );
+    return this.rows().filter((r) => {
+      const customerName = r.customer?.name?.toLowerCase() ?? '';
+      const phone = r.customer?.phoneNumber?.toLowerCase() ?? '';
+      const description = (r.description || '').toLowerCase();
+      return customerName.includes(q) || phone.includes(q) || description.includes(q);
+    });
   });
 
   ngOnInit() {
@@ -125,6 +127,7 @@ export class DashboardComponent implements OnInit {
         const txMap = new Map<string, Transaction>();
 
         for (const t of txList) {
+          if (!t.customerId) continue;
           const c = t.customerId as Customer;
           const id = c?._id || (t.customerId as string);
           const existing = txMap.get(id);
@@ -143,6 +146,7 @@ export class DashboardComponent implements OnInit {
           const tx = txMap.get(customer._id) ?? null;
           return {
             customer,
+            description: tx?.description ?? '',
             transaction: tx,
             creditAmount: tx?.creditAmount ?? 0,
             debitAmount: tx?.debitAmount ?? 0,
@@ -150,7 +154,18 @@ export class DashboardComponent implements OnInit {
           };
         });
 
-        this.rows.set(merged);
+        const expenseRows: DashboardRow[] = txList
+          .filter((t) => !t.customerId)
+          .map((t) => ({
+            customer: null,
+            description: t.description || 'Expense',
+            transaction: t,
+            creditAmount: t.creditAmount ?? 0,
+            debitAmount: t.debitAmount ?? 0,
+            date: t.date ?? null,
+          }));
+
+        this.rows.set([...merged, ...expenseRows]);
         this.loading.set(false);
       },
       error: () => {
@@ -204,6 +219,7 @@ export class DashboardComponent implements OnInit {
     this.editTx.set(t);
     this.editForm = {
       date: new Date(t.date).toISOString().split('T')[0],
+      description: t.description ?? '',
       creditAmount: t.creditAmount,
       debitAmount: t.debitAmount,
     };
@@ -213,7 +229,15 @@ export class DashboardComponent implements OnInit {
     const t = this.editTx();
     if (!t) return;
     this.saving.set(true);
-    this.txService.update(t._id, this.editForm).subscribe({
+    this.txService.update(t._id, {
+      ...this.editForm,
+      customerId:
+        typeof t.customerId === 'string'
+          ? t.customerId
+          : t.customerId && typeof t.customerId === 'object'
+            ? t.customerId._id
+            : null,
+    }).subscribe({
       next: () => {
         this.toast.success('Transaction updated');
         this.editTx.set(null);
